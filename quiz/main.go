@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/sethetter/gophercises/01-quiz/quiz"
+	"github.com/sethetter/gophercises/quiz/quiz"
 )
 
 func main() {
