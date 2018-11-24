@@ -1,22 +1,20 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 	"time"
-)
 
-type problem struct {
-	q string
-	a string
-}
+	"github.com/sethetter/gophercises/01-quiz/quiz"
+)
 
 func main() {
 	csvFilename := flag.String("csv", "filename", "a csv file in the format of question,answer")
 	timeLimit := flag.Int("limit", 30, "the time limit for the quiz")
+
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
@@ -32,44 +30,8 @@ func main() {
 
 	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 
-	problems := parseLines(lines)
-	correct := 0
-
-	for i, p := range problems {
-		fmt.Printf("Problem #%d: %s = ", i+1, p.q)
-
-		answerCh := make(chan string)
-		go func() {
-			var answer string
-			fmt.Scanf("%s", &answer)
-			answerCh <- answer
-		}()
-
-		select {
-		case <-timer.C:
-			fmt.Printf("\nScore: %d/%d\n", correct, len(problems))
-			return
-		case answer := <-answerCh:
-			if answer == p.a {
-				correct++
-			}
-		}
-	}
-
-	fmt.Printf("Score: %d/%d\n", correct, len(problems))
-}
-
-func parseLines(lines [][]string) []problem {
-	ret := make([]problem, len(lines))
-
-	for i, line := range lines {
-		ret[i] = problem{
-			q: line[0],
-			a: strings.TrimSpace(line[1]),
-		}
-	}
-
-	return ret
+	quiz := quiz.New(lines, timer.C)
+	quiz.AskQuestions(bufio.NewReader(os.Stdin), bufio.NewWriter(os.Stdout))
 }
 
 func exit(msg string) {
