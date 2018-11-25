@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var urlmap = map[string]string{
@@ -13,7 +15,7 @@ var urlmap = map[string]string{
 	"/se": "https://seth.computer",
 }
 
-func fallback(w http.ResponseWriter, r *http.Request) {
+func fallbackHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "fallback")
 }
 
@@ -23,23 +25,15 @@ func TestMapHandler(t *testing.T) {
 	r := httptest.NewRequest("GET", path, nil)
 	w := httptest.NewRecorder()
 
-	handler, err := MapHandler(urlmap, http.HandlerFunc(fallback))
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
+	handler, err := MapHandler(urlmap, http.HandlerFunc(fallbackHandler))
+	assert.Nil(t, err, "error creating handler")
 
 	handler(w, r)
 	w.Flush()
 	result := w.Result()
 
-	if result.StatusCode != 302 {
-		t.Errorf("status code: expected %d, got %d", 302, result.StatusCode)
-	}
-
-	l := result.Header.Get("location")
-	if l != urlmap[path] {
-		t.Errorf("location header: expected %s, got %s", urlmap[path], l)
-	}
+	assert.Equal(t, 302, result.StatusCode, "status code mismatch")
+	assert.Equal(t, urlmap[path], result.Header.Get("location"), "incorect redirect url")
 }
 
 func TestMapHandlerFallback(t *testing.T) {
@@ -48,25 +42,16 @@ func TestMapHandlerFallback(t *testing.T) {
 	r := httptest.NewRequest("GET", path, nil)
 	w := httptest.NewRecorder()
 
-	handler, err := MapHandler(urlmap, http.HandlerFunc(fallback))
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
+	handler, err := MapHandler(urlmap, http.HandlerFunc(fallbackHandler))
+	assert.Nil(t, err, "error creating handler")
 
 	handler(w, r)
 	w.Flush()
 	result := w.Result()
 
-	if result.StatusCode != 200 {
-		t.Errorf("status code: expected %d, got %d", 302, result.StatusCode)
-	}
+	assert.Equal(t, 200, result.StatusCode, "status code mismatch")
 
 	body, err := ioutil.ReadAll(result.Body)
-	if err != nil {
-		t.Errorf("err: %v", err)
-	}
-
-	if string(body) != "fallback" {
-		t.Errorf("fallback failure: expected %s, got %s", "fallback", string(body))
-	}
+	assert.Nil(t, err, "error reading response body")
+	assert.Equal(t, "fallback", string(body), "incorrect response body")
 }
