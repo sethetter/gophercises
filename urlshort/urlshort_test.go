@@ -41,6 +41,17 @@ se: https://seth.computer
 	testHandlerResponse(t, handler)
 }
 
+func TestJSONHander(t *testing.T) {
+	json := `
+{
+	"ow": "https://openwichita.org",
+	"se": "https://seth.computer"
+}
+`
+	handler, err := JSONHandler([]byte(json), http.HandlerFunc(fallbackHandler))
+	assert.Nil(t, err, "error creating handler")
+	testHandlerResponse(t, handler)
+}
 func testHandlerResponse(t *testing.T, handler http.Handler) {
 	paths := []string{"ow", "se", "does-not-exist"}
 

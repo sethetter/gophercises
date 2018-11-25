@@ -1,6 +1,7 @@
 package urlshort
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -10,6 +11,15 @@ import (
 func YAMLHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
 	var parsed map[string]string
 	err := yaml.Unmarshal(yml, &parsed)
+	if err != nil {
+		return nil, err
+	}
+	return MapHandler(parsed, fallback)
+}
+
+func JSONHandler(yml []byte, fallback http.Handler) (http.HandlerFunc, error) {
+	var parsed map[string]string
+	err := json.Unmarshal(yml, &parsed)
 	if err != nil {
 		return nil, err
 	}
