@@ -16,6 +16,7 @@ func dbCommand() cli.Command {
 			cli.StringFlag{
 				Name:        "path",
 				Usage:       "path to the db file",
+				Value:       "dev.db",
 				Destination: &dbFile,
 			},
 		},

@@ -4,7 +4,6 @@ A small web service for handling short urls.
 
 # Next
 
-- Clean up organization of cmd code, split into files
 - Clean up logging in the cmd handler
 - Create an admin page behind basic auth to crud url mappings in the boltdb
 
