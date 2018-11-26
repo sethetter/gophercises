@@ -70,8 +70,15 @@ func main() {
 		log.Fatalf("Failed to create default handler: %v", err)
 	}
 
-	http.Handle("/", urlshortHandler)
+	http.Handle("/", loggingMiddleware(urlshortHandler))
 
 	log.Printf("Serving on port %s\n", *port)
 	log.Fatal(http.ListenAndServe(":"+*port, nil))
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
 }
