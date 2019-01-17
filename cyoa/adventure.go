@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 )
 
 // Adventure is the top level data structure holding the individual story arcs.
@@ -23,16 +23,12 @@ type Option struct {
 	Arc  string `json:"arc"`
 }
 
-func parseAdventureFile(filename string) (adventure Adventure, err error) {
-	fcontents, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return
+func parseAdventure(f io.Reader) (Adventure, error) {
+	var adv Adventure
+	if err := json.NewDecoder(f).Decode(&adv.arcs); err != nil {
+		return adv, err
 	}
-	err = json.Unmarshal(fcontents, &adventure.arcs)
-	if err != nil {
-		return
-	}
-	return
+	return adv, nil
 }
 
 // Runner is the interface for types that can run an adventure.

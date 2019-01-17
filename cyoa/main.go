@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 )
 
 var (
@@ -13,8 +14,13 @@ var (
 func main() {
 	flag.Parse()
 
+	f, err := os.Open(*storyFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Parse the adventure.
-	adventure, err := parseAdventureFile(*storyFile)
+	adventure, err := parseAdventure(f)
 	if err != nil {
 		log.Fatal(err)
 	}
